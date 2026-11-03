@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: API Menu Restoran
+  description: REST API untuk mengelola data menu restoran (Laravel).
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local Server
+tags:
+  - name: Menus
+    description: Operasi data menu
+
+paths:
+  /api/menus:
+    get:
+      tags: [Menus]
+      summary: Menampilkan seluruh menu
+      responses:
+        '200':
+          description: Berhasil mengambil data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Menu'
+        '500':
+          description: Kesalahan server
+    post:
+      tags: [Menus]
+      summary: Menambahkan menu baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuInput'
+      responses:
+        '201':
+          description: Menu berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '400':
+          description: Request tidak valid (data tidak lengkap)
+        '500':
+          description: Kesalahan server
+
+  /api/menus/{id}:
+    get:
+      tags: [Menus]
+      summary: Menampilkan menu berdasarkan ID
+      parameters:
+        - $ref: '#/components/parameters/MenuId'
+      responses:
+        '200':
+          description: Berhasil mengambil data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '404':
+          description: Menu tidak ditemukan
+          content:
+            application/json:
+              example:
+                message: Menu tidak ditemukan
+        '500':
+          description: Kesalahan server
+    put:
+      tags: [Menus]
+      summary: Mengubah data menu
+      parameters:
+        - $ref: '#/components/parameters/MenuId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuInput'
+      responses:
+        '200':
+          description: Menu berhasil diubah
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '400':
+          description: Request tidak valid
+        '404':
+          description: Menu tidak ditemukan
+        '500':
+          description: Kesalahan server
+    delete:
+      tags: [Menus]
+      summary: Menghapus menu
+      parameters:
+        - $ref: '#/components/parameters/MenuId'
+      responses:
+        '200':
+          description: Menu berhasil dihapus
+          content:
+            application/json:
+              example:
+                message: Menu berhasil dihapus
+        '404':
+          description: Menu tidak ditemukan
+        '500':
+          description: Kesalahan server
+
+components:
+  parameters:
+    MenuId:
+      name: id
+      in: path
+      required: true
+      description: ID menu
+      schema:
+        type: integer
+        example: 1
+  schemas:
+    MenuInput:
+      type: object
+      required: [name, category, price]
+      properties:
+        name:
+          type: string
+          example: Nasi Goreng Spesial
+        category:
+          type: string
+          example: Makanan Utama
+        price:
+          type: number
+          example: 25000
+        description:
+          type: string
+          example: Nasi goreng dengan telur, ayam, dan kerupuk
+    Menu:
+      allOf:
+        - $ref: '#/components/schemas/MenuInput'
+        - type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+              
