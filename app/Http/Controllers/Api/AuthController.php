@@ -34,10 +34,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
-
+    'email' => ['required', 'email'],
+    'password' => ['required', 'string'],
+    'mode' => ['nullable', 'in:read,edit,delete,manage'],
+]);
         $user = User::where('email', $data['email'])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
@@ -46,11 +46,21 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('menu-api')->plainTextToken;
+        $mode = $data['mode'] ?? 'read';
+
+        $abilities = match ($mode) {
+            'read'   => ['menus:read'],
+            'edit'   => ['menus:read', 'menus:update'],
+            'delete' => ['menus:read', 'menus:delete'],
+            'manage' => ['menus:read', 'menus:create', 'menus:update', 'menus:delete'],
+        };
+
+        $token = $user->createToken("menu-{$mode}", $abilities)->plainTextToken;
 
         return response()->json([
             'token_type' => 'Bearer',
             'token' => $token,
+            'abilities' => $abilities,
         ]);
     }
 
