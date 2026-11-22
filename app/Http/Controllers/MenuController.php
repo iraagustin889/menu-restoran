@@ -41,6 +41,8 @@ class MenuController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $validated['user_id'] = $request->user()->id;
+
         $menu = Menu::create($validated);
 
         return response()->json($menu, 201);
