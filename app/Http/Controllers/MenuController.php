@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Traits\EnsureOwnerTrait;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
+    use EnsureOwnerTrait;
+
     // Browse - GET /api/menus
     public function index()
     {
@@ -15,13 +18,15 @@ class MenuController extends Controller
     }
 
     // Read - GET /api/menus/{id}
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $menu = Menu::find($id);
 
         if (!$menu) {
             return response()->json(['message' => 'Menu tidak ditemukan'], 404);
         }
+
+        $this->ensureOwner($request, $menu);
 
         return response()->json($menu);
     }
@@ -50,6 +55,8 @@ class MenuController extends Controller
             return response()->json(['message' => 'Menu tidak ditemukan'], 404);
         }
 
+        $this->ensureOwner($request, $menu);
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'category' => 'sometimes|required|string|max:255',
@@ -63,13 +70,15 @@ class MenuController extends Controller
     }
 
     // Delete - DELETE /api/menus/{id}
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $menu = Menu::find($id);
 
         if (!$menu) {
             return response()->json(['message' => 'Menu tidak ditemukan'], 404);
         }
+
+        $this->ensureOwner($request, $menu);
 
         $menu->delete();
 
